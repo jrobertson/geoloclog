@@ -20,6 +20,7 @@ class GeoLocLog
     else
       dx = DynarexDaily.new 'geoloc[title, date]/location(place, label, ' + 
                'entered, lastseen, address, coords)', filename: @filename
+      dx.default_key = 'uid'
       dx
     end
 

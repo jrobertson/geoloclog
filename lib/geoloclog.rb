@@ -9,13 +9,14 @@ require 'dynarex-daily'
 
 class GeoLocLog
 
-  def initialize(file=nil, wait: 60, labels: nil, dbfile: 'glw.db', 
+  def initialize(file='geoloclog.xml', wait: 60, labels: nil, dbfile: 'glw.db', 
                 timeout: 10)
 
-    @filename = 'geoloclog.xml'
+    @filename = file
+   
     @labels = labels ? YAML.load(RXFHelper.read(labels).first) : {}
 
-    @dx = if file then
+    @dx = if File.exists? file then
       DynarexDaily.new file
     else
       dx = DynarexDaily.new 'geoloc[title, date]/location(place, label, ' + 

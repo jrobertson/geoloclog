@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'geoloclog'
-  s.version = '0.1.2'
+  s.version = '0.1.3'
   s.summary = 'Logs geolocated placenames as well as coordinates ' +
       'in reverse chronological order.'
   s.authors = ['James Robertson']

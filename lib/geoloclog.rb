@@ -17,11 +17,13 @@ require 'dynarex-daily'
 #           timesout when accessing the Google API
 
 class GeoLocLog
+  
+  attr_reader :labels
 
   def initialize(file='geoloclog.xml', wait: 60, labels: nil, dbfile: 'glw.db', 
-                timeout: 10)
+                  timeout: 10, placehold: true)
 
-    @filename, @wait = file, wait
+    @filename, @wait, @placehold = file, wait, placehold
    
     @labels = labels ? YAML.load(RXFHelper.read(labels).first) : {}
 
@@ -41,6 +43,8 @@ class GeoLocLog
   def add(lat, lon)
 
     return if location and  (Time.now - Time.parse(location.created) < @wait)
+    
+
 
     begin
       h = @glw.locate lat, lon
@@ -58,7 +62,19 @@ class GeoLocLog
       coords: [lat, lon].join(', ')
     }
 
-    @dx.create record
+    
+    if location and @placehold and location.place == record[:place] then
+      
+      # find the most recent record and update it
+      
+      location.address = record[:address]
+      location.lastseen = record[:lastseen]
+      location.coords = record[:coords]
+      
+    else
+      @dx.create record
+    end
+    
     @dx.save @filename
 
   end

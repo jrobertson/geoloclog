@@ -7,12 +7,21 @@ require 'glw'
 require 'dynarex-daily'
 
 
+# options:
+# 
+#  file: used to store the place names and the coordinates
+#  wait: records can only be added after the given wait time in seconds
+#  labels: Maps the returned place name with a user-defined label (optional)
+#  dbfile: sqlite database file used to store an addresses with a position
+#  timeout: number of seconds to wait before the Geocoder gem 
+#           timesout when accessing the Google API
+
 class GeoLocLog
 
   def initialize(file='geoloclog.xml', wait: 60, labels: nil, dbfile: 'glw.db', 
                 timeout: 10)
 
-    @filename = file
+    @filename, @wait = file, wait
    
     @labels = labels ? YAML.load(RXFHelper.read(labels).first) : {}
 
@@ -31,7 +40,14 @@ class GeoLocLog
 
   def add(lat, lon)
 
-    h = @glw.locate lat, lon
+    return if location and  (Time.now - Time.parse(location.created) < @wait)
+
+    begin
+      h = @glw.locate lat, lon
+    rescue
+      puts 'geoloclog::add warning: ' + ($!).inspect
+      return
+    end
 
     record = {
       place: h[:route],
